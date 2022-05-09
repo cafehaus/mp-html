@@ -1,3 +1,8 @@
+// wm-custom
+import customTag from './customTag.js'
+const customTagList = customTag.tagList
+const customTagListTxt = customTag.tagListTxt
+
 /**
  * @fileoverview html 解析器
  */
@@ -5,10 +10,10 @@
 // 配置
 const config = {
   // 信任的标签（保持标签名不变）
-  trustTags: makeMap('a,abbr,ad,audio,b,blockquote,br,code,col,colgroup,dd,del,dl,dt,div,em,fieldset,h1,h2,h3,h4,h5,h6,hr,i,img,ins,label,legend,li,ol,p,q,ruby,rt,source,span,strong,sub,sup,table,tbody,td,tfoot,th,thead,tr,title,ul,video'),
+  trustTags: makeMap('a,abbr,ad,audio,b,blockquote,br,code,col,colgroup,dd,del,dl,dt,div,em,fieldset,h1,h2,h3,h4,h5,h6,hr,i,img,ins,label,legend,li,ol,p,q,ruby,rt,source,span,strong,sub,sup,table,tbody,td,tfoot,th,thead,tr,title,ul,video' + customTagListTxt),
 
   // 块级标签（转为 div，其他的非信任标签转为 span）
-  blockTags: makeMap('address,article,aside,body,caption,center,cite,footer,header,html,nav,pre,section'),
+  blockTags: makeMap('address,article,aside,body,caption,center,cite,footer,header,html,nav,pre,section' + customTagListTxt),
 
   // #ifdef (MP-WEIXIN || MP-QQ || APP-PLUS || MP-360) && VUE3
   // 行内标签
@@ -19,7 +24,7 @@ const config = {
   ignoreTags: makeMap('area,base,canvas,embed,frame,head,iframe,input,link,map,meta,param,rp,script,source,style,textarea,title,track,wbr'),
 
   // 自闭合的标签
-  voidTags: makeMap('area,base,br,col,circle,ellipse,embed,frame,hr,img,input,line,link,meta,param,path,polygon,rect,source,track,use,wbr'),
+  voidTags: makeMap('area,base,br,col,circle,ellipse,embed,frame,hr,img,input,line,link,meta,param,path,polygon,rect,source,track,use,wbr' + customTagListTxt),
 
   // html 实体
   entities: {
@@ -180,6 +185,9 @@ Parser.prototype.expose = function () {
   // #ifndef APP-PLUS-NVUE
   for (let i = this.stack.length; i--;) {
     const item = this.stack[i]
+    // wm-custom
+    if (customTagList.includs(item.name)) return
+
     if (item.c || item.name === 'a' || item.name === 'video' || item.name === 'audio') return
     item.c = 1
   }
@@ -247,7 +255,14 @@ Parser.prototype.parseStyle = function (node) {
     attrs.width = undefined
   }
   if (attrs.height) {
-    styleObj.height = parseFloat(attrs.height) + (attrs.height.includes('%') ? '%' : 'px')
+    // wm-custom
+    // 微信小程序video标签height：100%会造成视频不显示
+    if (node.name === 'video') {
+      let isPercent = attrs.height.includes('%')
+      styleObj.height = isPercent ? undefined : (parseFloat(attrs.height) + 'px')
+    } else {
+      styleObj.height = parseFloat(attrs.height) + (attrs.height.includes('%') ? '%' : 'px')
+    }
     attrs.height = undefined
   }
 
@@ -402,6 +417,47 @@ Parser.prototype.onOpenTag = function (selfClose) {
     this.expose()
   }
   // #endif
+
+  // wm-custom
+  // 画廊相册
+  if (node.name === 'minappergallery') {
+    let _str = attrs.images || ''
+    let list = _str.split(',http') || []
+    let images = []
+
+    if (list && list.length) {
+      let newList = list.map((m, i) => {
+        if (i) m = 'http' + m
+        return m
+      })
+      images = newList.map((m, i) => {
+        let obj = {}
+        obj.imageurl = m
+        obj.id = i
+        obj.allimages = newList
+        return obj
+      })
+    }
+
+    attrs.images = images
+  }
+
+  // 地图
+  if (node.name === 'minappermap') {
+    let markers = []
+    let marker = {
+      latitude: attrs.latitude,
+      longitude: attrs.longitude,
+      title: attrs.title,
+      id: 'minappermarker1'
+    }
+    markers.push(marker)
+    attrs.markers = markers
+  }
+
+  if (customTagList.includes(node.name)) {
+    this.expose()
+  }
 
   // 处理自闭合标签
   if (close) {
@@ -731,6 +787,8 @@ Parser.prototype.popNode = function () {
     // #ifdef H5 || APP-PLUS
     || node.name === 'iframe' // eslint-disable-line
     // #endif
+    // wm-custom
+    || customTagList.includes(node.name)
   ) {
     this.expose()
   } else if (node.name === 'video') {

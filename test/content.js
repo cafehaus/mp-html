@@ -1,7 +1,44 @@
 /**
  * @fileoverview 用于测试的 html 内容
  */
-module.exports = `<title>富文本示例</title>
+module.exports = `
+<h3>视频号主页</h3>
+<minapperchannels title="test" channelsid="sph6d2Mz8dHxcws" channelstitle="微慕程序" channelsdesc="专业资讯、媒体、社交小程序" channelslogo="https://blog.minapper.com/wp-content/uploads/2022/04/20220406225418968.jpg" />
+
+<minapperchannelsevent channelsid="sph6d2Mz8dHxcws" channelstitle="微慕程序" channelslogo="https://blog.minapper.com/wp-content/uploads/2022/04/20220406225418968.jpg" eventtitle="微慕小程序专业版功能" eventcover ="https://blog.minapper.com/wp-content/uploads/2022/04/20220409164742387.jpg" eventid="event/UzFfAgtgekIEAQAAAAAA9UQBXU7o5QAAAAstQy6ubaLX4KHWvLEZgBPEwaJEflF6WuODzNPgMJroURi6UpfEuyow5sjFoVd9" />
+
+<minapperchannelsactivity finderusername="视频号id，以“sph”开头的id" channelstitle="我是一个视频号的测试号表哟哟，不是你的bug"  channels="视频号名称"  coverimage ="" logo="" />
+
+<minapperchannelsactivity finderusername="sph6d2Mz8dHxcws" feedtitle="利用公众号编辑器让小程序文章排版更好看"  channelstitle="微慕程序"  feedcover="https://blog.minapper.com/wp-content/uploads/2021/11/20211110182433959.png"  logo="https://blog.minapper.com/wp-content/uploads/2022/04/20220406225418968.jpg"/>
+
+<a redirectype="webpage" appid="" path="" href="https://www.minapper.com">微慕小程序官网</a>
+<a appid="wx46926513e9b706d3" path="pages/touxiang/index" codetype="miniapp"   href="https://shops.minapper.com/19.html">国庆与五星红旗合影，一起换头像为新中国庆生</a>
+<p><a href="https://shops.minapper.com/19.html">【专业版Pro】微慕WordPress小程序专业版</a></p>
+
+<audio name="此时此刻" author="许巍" src="https://blog.minapper.com/wp-content/uploads/2019/05/20191010200003156.mp3" controls="controls"></audio>
+
+<audio name="时间煮雨" author="郁可唯" src="https://blog.minapper.com/wp-content/uploads/time.mp3" controls="controls" poster="https://blog.minapper.com/wp-content/uploads/2021/12/20211224185821510.jpg"></audio>
+
+<video src="https://v.qq.com/x/page/u0858q9zzl9.html" controls="controls" width="300" height="150" data-mce-fragment="1"></video>
+
+<minappermap latitude="22.546485" longitude="113.945419" title="深圳市腾讯计算机系统有限公司" address ="深圳福田" distance="1">
+ 
+<h3>插入视频</h3>
+<p>腾讯视频参数是url</p>
+<minapperqqvideo vid="u0858q9zzl9" />
+<p>腾讯视频参数是vid</p>
+<minapperqqvideo vid="u0858q9zzl9" />
+<br />
+<video src="https://ugcws.video.gtimg.com/szg_36615125_50001_761a7e16a17244f0893c44770ebd9cf0.f622.mp4?vkey=B119F27307F5C672518C07DF8EC809FB0C94F34B01081285F14C1D01E9F6265CB4649572E33DD7DCA3BB01C0DD04E197EC18D875A1D3E6BB7975897B65DC88ECD3E7E4F6DB6A5E178257D501F4895CED0A611765937C287045FE79CF8A3BCBC44F2DD004DBD6B3C03E63F03179F697E526A8B06F88868E57" poster="https://puui.qpic.cn/qqvideo_ori/0/u0858q9zzl9_496_280/0" controls="controls" width="100%"></video>
+
+澳大利亚的埃斯佩兰斯<br />
+<p><minappergallery images="https://blog.minapper.com/wp-content/uploads/2020/08/20200813102706934.jpg,https://blog.minapper.com/wp-content/uploads/2020/08/20200813102707172.jpg,https://blog.minapper.com/wp-content/uploads/2020/08/20200813102708231.jpg,https://blog.minapper.com/wp-content/uploads/2020/08/20200813102708115.jpg,https://blog.minapper.com/wp-content/uploads/2020/08/20200813102709345.jpg,https://blog.minapper.com/wp-content/uploads/2020/08/20200813102710154.jpg,https://blog.minapper.com/wp-content/uploads/2020/08/20200813102710444.jpg,https://blog.minapper.com/wp-content/uploads/2020/08/20200813102711770.jpg,https://blog.minapper.com/wp-content/uploads/2020/08/20200813102711270.jpg"><br />
+</p>
+
+图片cnd相册解析<br />
+<minappergallery images="https://blogminapp.oss-accelerate.aliyuncs.com/wp-content/uploads/2020/08/20200813102706934.jpg?x-oss-process=image/quality,Q_95#,https://blogminapp.oss-accelerate.aliyuncs.com/wp-content/uploads/2020/08/20200813102707172.jpg?x-oss-process=image/quality,Q_95#,https://blogminapp.oss-accelerate.aliyuncs.com/wp-content/uploads/2020/08/20200813102708231.jpg?x-oss-process=image/quality,Q_95#,https://blogminapp.oss-accelerate.aliyuncs.com/wp-content/uploads/2020/08/20200813102708115.jpg?x-oss-process=image/quality,Q_95#,https://blogminapp.oss-accelerate.aliyuncs.com/wp-content/uploads/2020/08/20200813102709345.jpg?x-oss-process=image/quality,Q_95#,https://blogminapp.oss-accelerate.aliyuncs.com/wp-content/uploads/2020/08/20200813102710154.jpg?x-oss-process=image/quality,Q_95#,https://blogminapp.oss-accelerate.aliyuncs.com/wp-content/uploads/2020/08/20200813102710444.jpg?x-oss-process=image/quality,Q_95#,https://blogminapp.oss-accelerate.aliyuncs.com/wp-content/uploads/2020/08/20200813102711770.jpg?x-oss-process=image/quality,Q_95#,https://blogminapp.oss-accelerate.aliyuncs.com/wp-content/uploads/2020/08/20200813102711270.jpg?x-oss-process=image/quality,Q_95#">
+
+<title>富文本示例</title>
 <div>
   <section style="text-align: center; margin: 0px auto;">
     <section style="border-radius: 4px; border: 1px solid #757576; display: inline-block; padding: 5px 20px;">

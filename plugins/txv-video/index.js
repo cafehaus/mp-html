@@ -25,6 +25,15 @@ TxvVideo.prototype.onParse = function (node, parser) {
       parser.expose()
     }
   }
+  // wm-custom
+  if (node.name === 'minapperqqvideo' && node.attrs.vid) {
+    const vid = node.attrs.vid
+    if (vid) {
+      node.name = 'txv-video'
+      this.videos.push(vid)
+      parser.expose()
+    }
+  }
 }
 
 TxvVideo.prototype.onLoad = function () {

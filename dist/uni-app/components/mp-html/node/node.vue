@@ -20,15 +20,16 @@
       <!-- #endif -->
       <text v-else-if="n.name==='br'">\n</text>
       <!-- 链接 -->
-      <view v-else-if="n.name==='a'" :id="n.attrs.id" :class="(n.attrs.href?'_a ':'')+n.attrs.class" hover-class="_hover" :style="'display:inline;'+n.attrs.style" :data-i="i" @tap.stop="linkTap">
+      <view v-else-if="n.name==='a'" :id="n.attrs.id" :class="(n.attrs.href?'_a ':'')+n.attrs.class" hover-class="_hover" :style="'display:inline;'+n.attrs.style" :data-i="i" :appid="n.attrs.appid" :redirectype="n.attrs.redirectype" :jumptype="n.attrs.jumptype" :feedid="n.attrs.feedid" :path="n.attrs.path" :src="n.attrs.href" :filetype="n.attrs.filetype" @tap.stop="linkTap">
         <node name="span" :childs="n.children" :opts="opts" style="display:inherit" />
+        <text v-if="n.attrs.redirectype === 'miniapp' || n.attrs.redirectype === 'apppage'" class="iconfont icon-miniapp-logo" />
       </view>
       <!-- 视频 -->
       <!-- #ifdef APP-PLUS -->
       <view v-else-if="n.html" :id="n.attrs.id" :class="'_video '+n.attrs.class" :style="n.attrs.style" v-html="n.html" @vplay.stop="play" />
       <!-- #endif -->
       <!-- #ifndef APP-PLUS -->
-      <video v-else-if="n.name==='video'" :id="n.attrs.id" :class="n.attrs.class" :style="n.attrs.style" :autoplay="n.attrs.autoplay" :controls="n.attrs.controls" :loop="n.attrs.loop" :muted="n.attrs.muted" :object-fit="n.attrs['object-fit']" :poster="n.attrs.poster" :src="n.src[ctrl[i]||0]" :data-i="i" @play="play" @error="mediaError" />
+      <video v-else-if="n.name==='video'" :id="n.attrs.id" :class="'wm-video ' + n.attrs.class" :style="n.attrs.style" :autoplay="n.attrs.autoplay" :controls="n.attrs.controls" :loop="n.attrs.loop" :muted="n.attrs.muted" :object-fit="n.attrs['object-fit']" :poster="n.attrs.poster" :src="n.src[ctrl[i]||0]" :data-i="i" @play="play" @error="mediaError" />
       <!-- #endif -->
       <!-- #ifdef H5 || APP-PLUS -->
       <iframe v-else-if="n.name==='iframe'" :style="n.attrs.style" :allowfullscreen="n.attrs.allowfullscreen" :frameborder="n.attrs.frameborder" :src="n.attrs.src" />
@@ -36,7 +37,7 @@
       <!-- #endif -->
       <!-- #ifndef MP-TOUTIAO || ((H5 || APP-PLUS) && VUE3) -->
       <!-- 音频 -->
-      <audio v-else-if="n.name==='audio'" :id="n.attrs.id" :class="n.attrs.class" :style="n.attrs.style" :author="n.attrs.author" :controls="n.attrs.controls" :loop="n.attrs.loop" :name="n.attrs.name" :poster="n.attrs.poster" :src="n.src[ctrl[i]||0]" :data-i="i" @play="play" @error="mediaError" />
+      <audio v-else-if="n.name==='audio'" :id="n.attrs.id" :class="'wm-audio ' + n.attrs.class" :style="n.attrs.style" :author="n.attrs.author || n.attrs.singer" :controls="n.attrs.controls" :loop="n.attrs.loop" :name="n.attrs.name || n.attrs.title" :poster="n.attrs.poster" :src="n.src[ctrl[i]||0]" :data-i="i" @play="play" @error="mediaError" />
       <!-- #endif -->
       <view v-else-if="(n.name==='table'&&n.c)||n.name==='li'" :id="n.attrs.id" :class="'_'+n.name+' '+n.attrs.class" :style="n.attrs.style">
         <node v-if="n.name==='li'" :childs="n.children" :opts="opts" />
@@ -54,6 +55,178 @@
           </block>
         </view>
       </view>
+      <!-- wm-custom -->
+      <!-- 跳转短代码 -->
+      <block v-else-if="n.name==='minappershortcode'">
+        <view class="wmcode-view" :appid="n.attrs.appid" :redirectype="n.attrs.redirectype" :jumptype="n.attrs.jumptype" :url="n.attrs.url" :path="n.attrs.path" @tap="goTo">
+          <view class="wmcode-inner">
+            <view class="wmcode-img">
+              <image mode="aspectFill" :src="n.attrs.poster" />
+            </view>
+            <view class="wmcode-content">
+              <view class="wmcode-text-box">
+                <view class="wmcode-text-title">{{n.attrs.title}}</view>
+                <view class="wmcode-text-des" v-if="n.attrs.description">
+                  {{n.attrs.description}}
+                </view>
+              </view>
+              <view class="wmcode-btn-box">
+                <view class="wmcode-price" v-if="n.attrs.codetype=='goods'">
+                  {{n.attrs.price ? '￥' + n.attrs.price : ''}}
+                </view>
+                <text class="cost-price" v-if="n.attrs.marketprice">￥{{n.attrs.marketprice}}</text>
+                <view class="wmcode-price" v-else />
+                <view class="wmcode-btn-goods" v-if="n.attrs.codetype=='goods'">
+                  {{n.attrs.buttontext}}
+                </view>
+                <view class="wmcode-btn" v-if="n.attrs.codetype !='goods'">
+                  {{n.attrs.buttontext}}
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+      <!-- 视频号主页短代码 -->
+      <block v-else-if="n.name==='minapperchannels'">
+        <view class="wm-channels-page" :channelsid="n.attrs.channelsid" @tap.stop="goChannels">
+          <view class="wm-channels-page-content">
+            <image class="image" v-if="n.attrs.channelslogo" mode="aspectFill" :src="n.attrs.channelslogo" />
+            <view class="wm-channels-page-info">
+              <view class="wm-channels-name">{{n.attrs.channelstitle}}</view>
+              <view class="wm-channels-des">{{n.attrs.channelsdesc}}</view>
+            </view>
+          </view>
+          <view class="wm-channels-page-footer">
+            <view>视频号主页</view>
+            <text class="iconfont icon-channels" />
+          </view>
+        </view>
+      </block>
+      <!-- 视频号视频短代码 -->
+      <block v-else-if="n.name==='minapperchannelsactivity'">
+        <view class="wm-channels" :channelsid="n.attrs.channelsid" :feedid="n.attrs.feedid"  @tap.stop="openActivity">
+          <view class="wm-channels-img">
+            <image v-if="n.attrs.feedcover" class="image" mode="aspectFill" :src="n.attrs.feedcover" />
+            <view v-if="n.attrs.feedtitle" class="wm-channels-title">
+              <text class="wm-channels-text">{{n.attrs.feedtitle}}</text>
+            </view>
+          </view>
+          <view class="wm-channels-content" :channelsid="n.attrs.channelsid"  @tap.stop="goChannels">
+            <view class="wm-channels-info">
+              <image class="image" v-if="n.attrs.channelslogo" mode="aspectFill" :src="n.attrs.channelslogo" />
+              <view class="wm-channels-name">{{n.attrs.channelstitle}} · 视频</view>
+            </view>
+            <text class="iconfont icon-channels" />
+          </view>
+        </view>
+      </block>
+      <!-- 视频号活动短代码 -->
+      <block v-else-if="n.name==='minapperchannelsevent'">
+        <view class="wm-channels" :channelsid="n.attrs.channelsid" :eventid="n.attrs.eventid"  @tap.stop="openEvent">
+          <view class="wm-channels-img">
+            <image v-if="n.attrs.eventcover" class="image" mode="aspectFill" :src="n.attrs.eventcover" />
+            <view v-if="n.attrs.eventtitle" class="wm-channels-title">
+              <text class="wm-channels-text">{{n.attrs.eventtitle}}</text>
+            </view>
+          </view>
+          <view class="wm-channels-content" :channelsid="n.attrs.channelsid"  @tap.stop="goChannels">
+            <view class="wm-channels-info">
+              <image class="image" v-if="n.attrs.channelslogo" mode="aspectFill" :src="n.attrs.channelslogo" />
+              <view class="wm-channels-name">{{n.attrs.channelstitle}} · 活动</view>
+            </view>
+            <text class="iconfont icon-channels" />
+          </view>
+        </view>
+      </block>
+      <!-- 广告短代码 -->
+      <block v-else-if="n.name==='minapperad'">
+        <ad :unit-id="n.attrs.unitid" :ad-type="n.attrs.adtype" :ad-theme="n.attrs.adtheme" :ad-intervals="n.attrs.adintervals" />
+      </block>
+      <!-- 地图短代码 -->
+      <block v-else-if="n.name==='minappermap'">
+        <view>
+          <map id="myMap" style="width: 100%; height: 420rpx;" :latitude="n.attrs.latitude" :longitude="n.attrs.longitude" :markers="n.attrs.markers" :title="n.attrs.title" :add="n.attrs.address" show-location @markertap="openmap"></map>
+          <view class="map-des" :latitude="n.attrs.latitude" :longitude="n.attrs.longitude" :title="n.attrs.title" :add="n.attrs.address" @tap="openmap">
+            <view class="distance">
+              <view class="addr">{{n.attrs.address}}</view>
+              {{n.attrs.distance ? (n.attrs.distance + 'km') : ''}}
+            </view>
+            <text class="iconfont icon-a-link" />
+          </view>
+        </view>
+      </block>
+      <!-- 全局商品短代码 -->
+      <block v-else-if="n.name==='minapperglobalgoods'">
+        <view class="wmcode-view" :productid="n.attrs.id" :path="n.attrs.path" @tap="goToSinshopproduct">
+          <view class="wmcode-inner">
+            <view class="wmcode-img">
+              <image mode="aspectFill" :src="n.attrs.poster" />
+            </view>
+            <view class="wmcode-content">
+              <view class="wmcode-text-box">
+                <view class="wmcode-text-title">{{n.attrs.title}}</view>
+                <view class="wmcode-text-des" v-if="n.attrs.description">
+                  {{n.attrs.description}}
+                </view>
+              </view>
+              <view class="wmcode-btn-box">
+                <view class="wmcode-price">{{n.attrs.price ? '￥' + n.attrs.price : ''}}</view>
+                <text class="cost-price" v-if="n.attrs.marketprice">￥{{n.attrs.marketprice}}</text>
+                <view class="wmcode-btn-goods">{{n.attrs.buttontext}}</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+      <!-- 单一商品短代码 -->
+      <block v-else-if="n.name==='minappergoods'">
+        <view class="wmcode-view" :productid="n.attrs.id" :path="n.attrs.path" @tap="goToSinshopproduct">
+          <view class="wmcode-inner">
+            <view class="wmcode-img">
+              <image mode="aspectFill" :src="n.attrs.poster" />
+            </view>
+            <view class="wmcode-content">
+              <view class="wmcode-text-box">
+                <view class="wmcode-text-title">{{n.attrs.title}}</view>
+                <view class="wmcode-text-des" v-if="n.attrs.description">
+                  {{n.attrs.description}}
+                </view>
+              </view>
+              <view class="wmcode-btn-box">
+                <view class="wmcode-price">{{n.attrs.price ? '￥' + n.attrs.price : ''}}</view>
+                <text class="cost-price" v-if="n.attrs.marketprice">￥{{n.attrs.marketprice}}</text>
+                <view class="wmcode-btn-goods">{{n.attrs.buttontext}}</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+      <!-- 网盘短代码 -->
+      <block v-else-if="n.name==='baidupan'">
+        <view class="baidu-disk">
+          <view class="header">
+            <view class="circle">
+              <text class="iconfont icon-baidu-disk" />
+            </view>
+            <view class="title">百度网盘</view>
+          </view>
+          <view class="url">链接：{{ n.attrs.href }}</view>
+          <view class="code">提取码：{{ n.attrs.code }}</view>
+          <view class="footer">
+            <view class="btn btn-copy" :code="{{n.attrs.code}}" @tap="onbaiPanCopy">复制提取码</view>
+            <view class="btn" :key="{{n.attrs.key}}"  @tap="onbaiduPanOpen">打开网盘</view>
+          </view>
+        </view>
+      </block>
+      <!-- 相册滑动短代码 -->
+      <block v-else-if="n.name==='minappergallery'">
+        <swiper indicator-dots indicator-color="rgba(255, 255, 255, .3)" indicator-active-color="rgba(255, 255, 255, .8)" interval="10000" autoplay="true" circular="true" style="height: 600rpx">
+          <swiper-item v-for="(item, idx) in n.attrs.images" :key="idx" :imgallsrc="item.allimages" :imgsrc="item.imageurl" @tap="previewImage">
+            <image mode="aspectFill" style="height: 600rpx;width:100%;" :src="item.imageurl" />
+          </swiper-item>
+        </swiper>
+      </block>
       
       <!-- 富文本 -->
       <!-- #ifdef H5 || ((MP-WEIXIN || MP-QQ || APP-PLUS || MP-360) && VUE2) -->
@@ -365,11 +538,245 @@ export default {
           // #endif
         })
       }
-    }
+    },
+
+    // 预览图片
+    previewImage(e) {
+      var imgallsrc = e.currentTarget.dataset.imgallsrc
+      var imgsrc = e.currentTarget.dataset.imgsrc
+      uni.previewImage({
+        current: imgsrc,
+        urls: imgallsrc
+      })
+    },
+
+    // 跳转
+    goTo(e){
+      var appid=e.currentTarget.dataset.appid;
+      var redirectype=e.currentTarget.dataset.redirectype;   
+      var path=e.currentTarget.dataset.path;
+      var url=e.currentTarget.dataset.url;
+      var jumptype=e.currentTarget.dataset.jumptype;
+
+      if (redirectype == 'apppage') { //跳转到小程序内部页面         
+        uni.navigateTo({
+          url: path
+        })
+      } else if (redirectype == 'webpage') //跳转到web-view内嵌的页面
+      {
+        url = '../webview/webview?url=' + url;
+        uni.navigateTo({
+          url: url
+        })
+      }
+      else if (redirectype == 'miniapp') //跳转其他小程序
+       {
+          if(jumptype=='embedded') {
+            uni.openEmbeddedMiniProgram({
+              appId: appid,
+              path: path
+            })
+          } else {
+            uni.navigateToMiniProgram({
+              appId: appid,
+              path: path
+            })
+          }
+      }
+    },
+
+    // 跳转视频号
+    goChannels(e){
+      let channelsid = e.currentTarget.dataset.channelsid
+      uni.openChannelsUserProfile({
+        finderUserName:channelsid
+      })
+    },
+
+      // 跳转视频号视频
+      openActivity(e){
+        let channelsid = e.currentTarget.dataset.channelsid
+        let feedId=e.currentTarget.dataset.feedid
+        uni.openChannelsActivity({
+          finderUserName:channelsid,
+          feedId: feedId
+          
+        })
+      },
+
+      // 跳转视频号视频
+      openEvent(e){
+        let channelsid = e.currentTarget.dataset.channelsid
+        let eventId=e.currentTarget.dataset.eventid
+        uni.openChannelsEvent({
+          finderUserName:channelsid,
+          eventId: eventId
+          
+        })
+      },
+
+    // 跳转
+    goToSinshopproduct(e){
+      var path=e.currentTarget.dataset.path;
+      uni.navigateTo({
+        url: path
+      })
+    },
+
+    // 打开地图查看位置
+    openmap(e) { 
+      var latitude = Number(e.currentTarget.dataset.latitude)
+      var longitude = Number(e.currentTarget.dataset.longitude)
+      var address = e.currentTarget.dataset.address
+      var name=e.currentTarget.dataset.title;
+      wx.openLocation({
+        latitude: latitude,
+        longitude: longitude,
+        scale: 15,
+        name: name,
+        address: address
+      })
+    },
+
+    // a标签跳转和复制链接
+    onTapATag(e) {
+      let href = e.currentTarget.dataset.src
+      let appid = e.currentTarget.dataset.appid
+      let redirectype = e.currentTarget.dataset.redirectype
+      let path = e.currentTarget.dataset.path
+
+      // 判断a标签src里是不是插入的文档链接
+      let isDoc = /\.(doc|docx|xls|xlsx|ppt|pptx|pdf)$/.test(href)
+
+      if (isDoc) {
+        this.openLinkDoc(e)
+        return
+      }
+
+      if(redirectype) {
+        if (redirectype == 'apppage') { //跳转到小程序内部页面         
+          uni.navigateTo({
+            url: path
+          })
+        } else if (redirectype == 'webpage') //跳转到web-view内嵌的页面
+        {
+          href = '../webview/webview?url=' + href;
+          uni.navigateTo({
+            url: href
+          })
+        }
+        else if (redirectype == 'miniapp') //跳转其他小程序
+        {
+          uni.navigateToMiniProgram({
+            appId: appid,
+            path: path
+          })
+        }
+      } else {
+        uni.setClipboardData({
+          data: href,
+          success: () =>
+            uni.showToast({
+              title: '链接已复制'
+            })
+        })
+      }
+    },
+    onbaiPanCopy(e) {
+      const code =  e.currentTarget.dataset.code
+      if (!code) {
+        uni.showToast({
+          title: '提取码不存在！',
+          icon: "none",
+          duration: 3000
+        })
+        return
+      }
+
+      uni.setClipboardData({
+        data: code,
+        success: function (res) {
+          uni.getClipboardData({
+            success: function (res) {
+              uni.showToast({
+                title: '复制成功',
+                icon: "success",
+                duration: 3000
+              })
+            }
+          })
+        }
+      })
+    },
+
+    // 打开网盘小程序
+    onbaiduPanOpen(e) {
+      const key = e.currentTarget.dataset.key
+      if (key) {
+        let path = `pages/netdisk_share/share?scene=${key}`
+        uni.navigateToMiniProgram({
+          appId: 'wxdcd3d073e47d1742',
+          path
+        })
+      } else {
+        uni.showToast({
+          title: '链接不存在！',
+          icon: "none",
+          duration: 3000
+        })
+      }
+    },
+
+    // 打开文档
+    async openLinkDoc(e) {
+      let url
+      let fileType
+      let src = e.currentTarget.dataset.src || ''
+
+      // 如果是a标签href中插入的文档
+      const res = await getApp().$api.getBaseConfig()
+      console.log('domains')
+      console.log(res)
+      let info = res.settings || {}
+      let domains = info.downloadfile_domain && info.downloadfile_domain.split(',') || []
+
+      let isHave = domains.find(m => src.includes(m))
+      if(!isHave) {
+        uni.setClipboardData({
+          data: src,
+          success: () =>
+            uni.showToast({
+              title: '链接已复制'
+            })
+        })
+        return
+      }
+
+      let isDoc = /\.(doc|docx|xls|xlsx|ppt|pptx|pdf)$/.test(src)
+      if (src && isDoc){
+        url = src
+        fileType = /doc|docx|xls|xlsx|ppt|pptx|pdf$/.exec(src)[0]
+      } else {
+        url = e.currentTarget.dataset.filelink
+        fileType = e.currentTarget.dataset.filetype
+      }
+
+      uni.downloadFile({
+        url,
+        success: function (res) {
+          const filePath = res.tempFilePath
+          uni.openDocument({
+            filePath,
+            // fieldType
+          })
+        }
+      })
+    },
   }
 }
 </script>
 <style>
+@import url(./wm.css);
 /* a 标签默认效果 */
 ._a {
   padding: 1.5px 0 1.5px 0;
@@ -379,7 +786,7 @@ export default {
 
 /* a 标签点击态效果 */
 ._hover {
-  text-decoration: underline;
+  /* text-decoration: underline; */
   opacity: 0.7;
 }
 
@@ -390,7 +797,6 @@ export default {
 }
 
 /* 内部样式 */
-
 ._block {
   display: block;
 }

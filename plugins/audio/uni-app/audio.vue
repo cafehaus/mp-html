@@ -1,7 +1,10 @@
 <template>
 	<view v-if="controls" class="_contain">
     <!-- 海报和按钮 -->
-		<view class="_poster" :style="'background-image:url('+poster+')'">
+		<!-- <view class="_poster" :style="'background-image:url('+poster+')'"> -->
+    <view :class="poster ? '_poster' : '_poster _poster_icon'">
+      <image v-if="poster" class="_poster_img" mode="aspectFill" :src="poster" />
+      <text v-else class="iconfont icon-headset" />
 			<view class="_button" @tap="_buttonTap">
 				<view :class="playing?'_pause':'_play'" />
 			</view>
@@ -132,18 +135,74 @@ export default {
 </script>
 
 <style>
+/* 字体图标 */
+@font-face {
+  font-family: "iconfont"; /* Project id 1187166 */
+  src: url('//at.alicdn.com/t/font_1187166_o0g09eo9kzn.woff2?t=1628748615633') format('woff2'),
+       url('//at.alicdn.com/t/font_1187166_o0g09eo9kzn.woff?t=1628748615633') format('woff'),
+       url('//at.alicdn.com/t/font_1187166_o0g09eo9kzn.ttf?t=1628748615633') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-headset:before {
+  content: "\e62b";
+}
+
+.icon-a-link:before {
+  content: "\e6e7";
+}
+
+.icon-miniapp-logo:before {
+  content: "\e61e";
+}
+
 /* 顶层容器 */
 ._contain {
   position: relative;
   display: inline-flex;
-  width: 290px;
+  width: 100%;
   background-color: #fcfcfc;
   border: 1px solid #e0e0e0;
   border-radius: 2px;
+  box-sizing: border-box;
+  margin: 6px 0;
 }
 
-/* 播放、暂停按钮 */
+._poster {
+  width: 70px;
+  height: 70px;
+  position: relative;
+  text-align: center;
+}
+
+._poster_icon {
+  background-color: #a0bcf9;
+}
+
+._poster_img {
+  width: 70px;
+  height: 70px;
+}
+
+._poster .iconfont {
+  font-size: 40px;
+  line-height: 70px;
+  color: #fff;
+  text-align: center;
+}
+
 ._button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -169,21 +228,10 @@ export default {
   background-color: white;
 }
 
-/* 海报 */
-._poster {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 70px;
-  height: 70px;
-  background-color: #e6e6e6;
-  background-size: contain;
-}
-
 /* 标题栏 */
 ._title {
   flex: 1;
-  margin: 4px 0 0 14px;
+  margin: 0 0 0 14px;
   text-align: left;
 }
 
