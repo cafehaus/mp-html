@@ -1,6 +1,5 @@
-@font-face {
+/* @font-face {
     font-family: "iconfont";
-    /* Project id 2380172 */
     src: url('//at.alicdn.com/t/font_2380172_10honnhhu47.woff2?t=1649549079441') format('woff2'),
         url('//at.alicdn.com/t/font_2380172_10honnhhu47.woff?t=1649549079441') format('woff'),
         url('//at.alicdn.com/t/font_2380172_10honnhhu47.ttf?t=1649549079441') format('truetype');
@@ -40,7 +39,7 @@
 
 .icon-logo:before {
     content: "\e628";
-}
+} */
 
 .wm-audio {
     width: 100%;

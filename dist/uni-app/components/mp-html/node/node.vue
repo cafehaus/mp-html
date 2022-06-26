@@ -37,7 +37,7 @@
       <!-- #endif -->
       <!-- #ifndef MP-TOUTIAO || ((H5 || APP-PLUS) && VUE3) -->
       <!-- 音频 -->
-      <audio v-else-if="n.name==='audio'" :id="n.attrs.id" :class="'wm-audio ' + n.attrs.class" :style="n.attrs.style" :author="n.attrs.author || n.attrs.singer" :controls="n.attrs.controls" :loop="n.attrs.loop" :name="n.attrs.name || n.attrs.title" :poster="n.attrs.poster" :src="n.src[ctrl[i]||0]" :data-i="i" @play="play" @error="mediaError" />
+      
       <!-- #endif -->
       <view v-else-if="(n.name==='table'&&n.c)||n.name==='li'" :id="n.attrs.id" :class="'_'+n.name+' '+n.attrs.class" :style="n.attrs.style">
         <node v-if="n.name==='li'" :childs="n.children" :opts="opts" />
@@ -227,7 +227,7 @@
           </swiper-item>
         </swiper>
       </block>
-      
+      <my-audio v-else-if="n.name=='audio'" :class="n.attrs.class" :style="n.attrs.style" :aid="n.attrs.id" :author="n.attrs.author" :controls="n.attrs.controls" :autoplay="n.attrs.autoplay" :loop="n.attrs.loop" :name="n.attrs.name" :poster="n.attrs.poster" :src="n.src[ctrl[i]||0]" :data-i="i" data-source="audio" @play="play" @error="mediaError" /><rich-text v-else-if="n.attrs['data-content']" :nodes="[n]" :data-content="n.attrs['data-content']" :data-lang="n.attrs['data-lang']" @longpress="copyCode" /><txv-video v-else-if="n.name=='txv-video'" :vid="n.attrs.vid" :playerid="n.attrs.vid" :id="n.attrs.vid" :class="n.attrs.class" :style="n.attrs.style" controls :data-i="i" @play="play" @error="mediaError" />
       <!-- 富文本 -->
       <!-- #ifdef H5 || ((MP-WEIXIN || MP-QQ || APP-PLUS || MP-360) && VUE2) -->
       <rich-text v-else-if="!n.c&&!handler.isInline(n.name, n.attrs.style)" :id="n.attrs.id" :style="n.f" :nodes="[n]" />
@@ -272,6 +272,7 @@ module.exports = {
 }
 </script>
 <script>
+import myAudio from '../audio/audio'
 
 import node from './node'
 export default {
@@ -301,6 +302,7 @@ export default {
     opts: Array
   },
   components: {
+myAudio,
 
     // #ifndef H5 && VUE3
     node
@@ -338,7 +340,15 @@ export default {
     }
     // #endif
   },
-  methods:{
+  methods:{copyCode (e) {
+      uni.showActionSheet({
+        itemList: ['复制代码'],
+        success: () =>
+          uni.setClipboardData({
+            data: e.currentTarget.dataset.content
+          })
+      })
+    },
     // #ifdef MP-WEIXIN
     toJSON () { },
     // #endif
@@ -775,7 +785,108 @@ export default {
   }
 }
 </script>
-<style>
+<style>/deep/ .hl-code,/deep/ .hl-pre{color:#000;background:0 0;text-shadow:0 1px #fff;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}/deep/ .hl-code ::-moz-selection,/deep/ .hl-code::-moz-selection,/deep/ .hl-pre ::-moz-selection,/deep/ .hl-pre::-moz-selection{text-shadow:none;background:#b3d4fc}/deep/ .hl-code ::selection,/deep/ .hl-code::selection,/deep/ .hl-pre ::selection,/deep/ .hl-pre::selection{text-shadow:none;background:#b3d4fc}@media print{/deep/ .hl-code,/deep/ .hl-pre{text-shadow:none}}/deep/ .hl-pre{padding:1em;margin:.5em 0;overflow:auto}/deep/ .hl-pre{background:#f5f2f0}/deep/ .hl-cdata,/deep/ .hl-comment,/deep/ .hl-doctype,/deep/ .hl-prolog{color:#708090}/deep/ .hl-punctuation{color:#999}/deep/ .hl-namespace{opacity:.7}/deep/ .hl-boolean,/deep/ .hl-constant,/deep/ .hl-deleted,/deep/ .hl-number,/deep/ .hl-property,/deep/ .hl-symbol,/deep/ .hl-tag{color:#905}/deep/ .hl-attr-name,/deep/ .hl-builtin,/deep/ .hl-char,/deep/ .hl-inserted,/deep/ .hl-selector,/deep/ .hl-string{color:#690}/deep/ .hl-entity,/deep/ .hl-operator,/deep/ .hl-url,/deep/ .language-css .hl-string,/deep/ .style .hl-string{color:#9a6e3a;background:hsla(0,0%,100%,.5)}/deep/ .hl-atrule,/deep/ .hl-attr-value,/deep/ .hl-keyword{color:#07a}/deep/ .hl-class-name,/deep/ .hl-function{color:#dd4a68}/deep/ .hl-important,/deep/ .hl-regex,/deep/ .hl-variable{color:#e90}/deep/ .hl-bold,/deep/ .hl-important{font-weight:700}/deep/ .hl-italic{font-style:italic}/deep/ .hl-entity{cursor:help}/deep/ .md-p {
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+}
+
+/deep/ .md-table,
+/deep/ .md-blockquote {
+  margin-bottom: 16px;
+}
+
+/deep/ .md-table {
+  box-sizing: border-box;
+  width: 100%;
+  overflow: auto;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+/deep/ .md-tr {
+  background-color: #fff;
+  border-top: 1px solid #c6cbd1;
+}
+
+/deep/ .md-table .md-tr:nth-child(2n) {
+  background-color: #f6f8fa;
+}
+
+/deep/ .md-th,
+/deep/ .md-td {
+  padding: 6px 13px !important;
+  border: 1px solid #dfe2e5;
+}
+
+/deep/ .md-th {
+  font-weight: 600;
+}
+
+/deep/ .md-blockquote {
+  padding: 0 1em;
+  color: #6a737d;
+  border-left: 0.25em solid #dfe2e5;
+}
+
+/deep/ .md-code {
+  padding: 0.2em 0.4em;
+  font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+  font-size: 85%;
+  background-color: rgba(27, 31, 35, 0.05);
+  border-radius: 3px;
+}
+
+/deep/ .md-pre .md-code {
+  padding: 0;
+  font-size: 100%;
+  background: transparent;
+  border: 0;
+}/deep/ .hl-pre {
+  position: relative;
+}
+/deep/ .hl-code {
+  overflow: auto;
+  display: block;
+}/deep/ .hl-language {
+  font-size: 12px;
+  font-weight: 600;
+  position: absolute;
+  right: 8px;
+  text-align: right;
+  top: 3px;
+}
+/deep/ .hl-pre {
+  padding-top: 1.5em;
+}/deep/ .hl-pre {
+  font-size: 14px;
+  padding-left: 3.8em;
+  counter-reset: linenumber;
+}
+/deep/ .line-numbers-rows {
+  position: absolute;
+  pointer-events: none;
+  top: 1.5em;
+  font-size: 100%;
+  left: 0;
+  width: 3em; /* works for line-numbers below 1000 lines */
+  letter-spacing: -1px;
+  border-right: 1px solid #999;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+/deep/ .line-numbers-rows .span {
+  display: block;
+  counter-increment: linenumber;
+} 
+/deep/ .line-numbers-rows .span:before {
+  content: counter(linenumber);
+  color: #999;
+  display: block;
+  padding-right: 0.8em;
+  text-align: right;
+}
 @import url(./wm.css);
 /* a 标签默认效果 */
 ._a {

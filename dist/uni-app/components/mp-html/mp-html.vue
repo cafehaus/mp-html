@@ -41,7 +41,13 @@
 import node from './node/node'
 // #endif
 import Parser from './parser'
-const plugins=[]
+import markdown from './markdown/index.js'
+import audio from './audio/index.js'
+import emoji from './emoji/index.js'
+import highlight from './highlight/index.js'
+import style from './style/index.js'
+import txvVideo from './txv-video/index.js'
+const plugins=[markdown,audio,emoji,highlight,style,txvVideo,]
 // #ifdef APP-PLUS-NVUE
 const dom = weex.requireModule('dom')
 // #endif
@@ -56,6 +62,7 @@ export default {
     }
   },
   props: {
+    markdown: Boolean,
     containerStyle: {
       type: String,
       default: ''
@@ -156,6 +163,7 @@ export default {
      * @returns {Promise}
      */
     navigateTo (id, offset) {
+      id = this._ids[decodeURI(id)] || id
       return new Promise((resolve, reject) => {
         if (!this.useAnchor) {
           reject(Error('Anchor is disabled'))
