@@ -46,8 +46,7 @@ import audio from './audio/index.js'
 import emoji from './emoji/index.js'
 import highlight from './highlight/index.js'
 import style from './style/index.js'
-import txvVideo from './txv-video/index.js'
-const plugins=[markdown,audio,emoji,highlight,style,txvVideo,]
+const plugins=[markdown,audio,emoji,highlight,style,]
 // #ifdef APP-PLUS-NVUE
 const dom = weex.requireModule('dom')
 // #endif
