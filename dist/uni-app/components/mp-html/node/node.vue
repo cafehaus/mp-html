@@ -1051,6 +1051,11 @@ myAudio,
   display: inline;
 }
 
+._q {
+  text-align: justify;
+  line-height: 1.8;
+}
+
 /* #ifdef APP-PLUS */
 ._video {
   width: 300px;
