@@ -230,10 +230,10 @@
       <!-- insert -->
       <!-- 富文本 -->
       <!-- #ifdef H5 || ((MP-WEIXIN || MP-QQ || APP-PLUS || MP-360) && VUE2) -->
-      <rich-text v-else-if="!n.c&&!handler.isInline(n.name, n.attrs.style)" :id="n.attrs.id" :style="n.f+';line-height:1.8;text-align:justify;'" :nodes="[n]" />
+      <rich-text v-else-if="!n.c&&!handler.isInline(n.name, n.attrs.style)" :id="n.attrs.id" :style="n.f+';line-height:1.8;text-align:justify;word-break:break-all;'" :nodes="[n]" />
       <!-- #endif -->
       <!-- #ifndef H5 || ((MP-WEIXIN || MP-QQ || APP-PLUS || MP-360) && VUE2) -->
-      <rich-text v-else-if="!n.c" :id="n.attrs.id" :style="n.f+';display:inline;line-height:1.8;text-align:justify;'" :preview="false" :nodes="[n]" />
+      <rich-text v-else-if="!n.c" :id="n.attrs.id" :style="n.f+';display:inline;line-height:1.8;text-align:justify;word-break:break-all;'" :preview="false" :nodes="[n]" />
       <!-- #endif -->
       <!-- 继续递归 -->
       <view v-else-if="n.c===2" :id="n.attrs.id" :class="'_block _'+n.name+' '+n.attrs.class" :style="n.f+';'+n.attrs.style">
@@ -952,6 +952,7 @@ export default {
 	display: block;
   line-height: 1.8;
   text-align: justify;
+  word-break: break-all;
 }
 
 .wm-audio {
