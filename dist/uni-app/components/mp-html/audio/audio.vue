@@ -136,8 +136,8 @@ export default {
 
 <style>
 /* 字体图标 */
-@font-face {
-  font-family: "iconfont"; /* Project id 1187166 */
+/* @font-face {
+  font-family: "iconfont";
   src: url('//at.alicdn.com/t/font_1187166_o0g09eo9kzn.woff2?t=1628748615633') format('woff2'),
        url('//at.alicdn.com/t/font_1187166_o0g09eo9kzn.woff?t=1628748615633') format('woff'),
        url('//at.alicdn.com/t/font_1187166_o0g09eo9kzn.ttf?t=1628748615633') format('truetype');
@@ -161,7 +161,7 @@ export default {
 
 .icon-miniapp-logo:before {
   content: "\e61e";
-}
+} */
 
 /* 顶层容器 */
 ._contain {
