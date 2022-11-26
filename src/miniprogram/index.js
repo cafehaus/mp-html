@@ -1,5 +1,5 @@
 /*!
- * mp-html v2.3.0
+ * mp-html v2.4.0
  * https://github.com/jin-yufeng/mp-html
  *
  * Released under the MIT license
@@ -156,8 +156,6 @@ Component({
   // #endif
 
   detached () {
-    // 清除定时器
-    clearInterval(this._timer)
     // 注销插件
     this._hook('onDetached')
   },
@@ -292,6 +290,17 @@ Component({
     },
 
     /**
+     * @description 设置媒体播放速率
+     * @param {Number} rate 播放速率
+     */
+    setPlaybackRate (rate) {
+      this.playbackRate = rate
+      for (let i = (this._videos || []).length; i--;) {
+        this._videos[i].playbackRate(rate)
+      }
+    },
+
+    /**
      * @description 设置富文本内容
      * @param {string} content 要渲染的 html 字符串
      * @param {boolean} append 是否在尾部追加
@@ -330,19 +339,29 @@ Component({
       })
       // #endif
 
-      // 等待图片加载完毕
-      let height
-      clearInterval(this._timer)
-      this._timer = setInterval(() => {
-        this.getRect().then(rect => {
+      if (this.properties.lazyLoad || this.imgList._unloadimgs < this.imgList.length / 2) {
+        // 设置懒加载，每 350ms 获取高度，不变则认为加载完毕
+        let height
+        const callback = rect => {
           // 350ms 总高度无变化就触发 ready 事件
           if (rect.height === height) {
             this.triggerEvent('ready', rect)
-            clearInterval(this._timer)
+          } else {
+            height = rect.height
+            setTimeout(() => {
+              this.getRect().then(callback)
+            }, 350)
           }
-          height = rect.height
-        }).catch(() => { })
-      }, 350)
+        }
+        this.getRect().then(callback)
+      } else {
+        // 未设置懒加载，等待所有图片加载完毕
+        if (!this.imgList._unloadimgs) {
+          this.getRect(rect => {
+            this.triggerEvent('ready', rect)
+          })
+        }
+      }
     },
 
     /**

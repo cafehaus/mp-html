@@ -1,9 +1,10 @@
 # 快速开始 :id=quickstart
 
 ## 📦 源码获取 :id=source
-#### 小程序方式<sup style="color:red">new</sup> :id=mp
-   打开微信小程序 *富文本插件*，点击 *获取组件包* 按钮，选择使用平台、[扩展插件](/advanced/plugin) 以及 [个性化设置](#setting) 后即可生成组件包  
-   ![富文本插件](../assets/case/富文本插件.jpg)
+
+#### 小程序方式 :id=mp
+打开微信小程序 *富文本插件*，点击 *获取组件包* 按钮，选择使用平台、[扩展插件](advanced/plugin) 以及 [个性化设置](#setting) 后即可生成组件包  
+![富文本插件](../assets/case/富文本插件.jpg)
 
 #### npm 方式 :id=npm
    ```bash
@@ -40,7 +41,7 @@
   ?> 本方法仅适用于微信、*QQ* 小程序  
 
   1. 在小程序项目根目录下通过 [npm](#npm) 安装组件包  
-  2. 开发者工具中勾选 *使用 npm 模块* 并点击 *工具* - *构建 npm*  
+  2. 开发者工具中勾选 *使用 npm 模块*（若没有此选项则不需要）并点击 *工具* - *构建 npm*  
   3. 在需要使用页面的 *json* 文件中添加  
      ```json
      {
@@ -174,12 +175,17 @@
 由于渲染方式与其他端不同，有以下限制：  
 1. 不支持 [lazy-load](basic/prop#lazy-load) 属性
 2. 视频不支持全屏播放
+3. 如果在 *flex-direction: row* 的容器中使用，需要给组件设置宽度或设置 *flex: 1* 占满剩余宽度
 
 ### 📙 其他框架 :id=other
 其他框架没有专用包，但也可以引入对应平台的原生包使用，具体方法参考各框架官方文档    
 
 - taro  
   [https://taro-docs.jd.com/taro/docs/hybrid#使用原生组件](https://taro-docs.jd.com/taro/docs/hybrid#%E4%BD%BF%E7%94%A8%E5%8E%9F%E7%94%9F%E7%BB%84%E4%BB%B6)  
+
+  !> 在 *taro2* 中使用请使用 [示例项目](#demo) 中的非压缩组件包，否则可能出现异常，详见 [#301](https://github.com/jin-yufeng/mp-html/issues/301)
+
+  ?> 在 *taro* 中使用时属性名需用驼峰写法，如 *copy-link* 属性应写作 *copyLink*  
   
   ?> 需要 *taro* 专用包的开发者欢迎参与 [需求调研](https://github.com/jin-yufeng/mp-html/issues/374)
 - kbone  
@@ -232,16 +238,20 @@
    ```
 
 ## 🎈 个性化 :id=setting  
-通过编辑 [tools/config.js](https://github.com/jin-yufeng/mp-html/blob/master/tools/config.js) 可以按需要生成个性化的组件包，主要的字段有：  
+?> 本组件提供了以下配置项可以生成个性化的组件包，配置项可以通过 [示例小程序](#mp) 进行设置，或参考 [使用插件包](advanced/plugin#use) 中的方式自行设置配置文件并进行打包  
 
 #### plugins  
 需要使用的插件名称列表，关于插件的详细信息见 [插件](advanced/plugin)  
 
 #### externStyle  
+!> 暂不支持对图片设置宽高，详见 [#426](https://github.com/jin-yufeng/mp-html/issues/426)
+
 外部样式，一个 *css* 字符串，将被用于 *html* 的渲染，但仅支持 *class* 选择器  
 
 ?> [2.1.0](changelog/changelog#v210) 版本起增加支持 **标签名选择器**，通过这种方式给标签设置的样式全局有效，在样式较长或作用标签数量较大时这种方法的性能要高于 [tag-style](basic/prop#tag-style) 属性，且写法更加灵活（可以与伪类、*class* 配合等）  
 需要注意的是，由于 [组件](https://developers.weixin.qq.com/miniprogram/dev/framework/custom-component/wxml-wxss.html#%E7%BB%84%E4%BB%B6%E6%A0%B7%E5%BC%8F) 内仅支持 *class* 选择器，直接将标签名选择器 **写在 wxss 中是无效的**，必须写在本字段中，构建过程中会自动转换为 *class* 选择器  
+
+?> [2.3.1](changelog/changelog#v231) 版本起，组件取消样式隔离，部分平台（微信小程序 *2.11.0+* 基础库完全支持；*QQ*、百度小程序部分情况下支持）支持直接引入页面样式中的 *class* 选择器，无需使用本方法引入；若遇到样式无法生效或需要使用标签名选择器，则仍需要使用本方法
 
 #### customElements  
 自定义标签列表（[2.2.0](changelog/changelog#v220) 版本起支持），可以在这里注册需要使用的小程序功能标签（如 *ad*、*ad-custom*、*official-account*、*map* 等）  
@@ -265,5 +275,3 @@ customElements: [{
 ```
 
 剩余的是一些编译过程中压缩工具的配置，可以按需要设置  
-
-设置完成后即可 [生成新的组件包](advanced/develop#pack)，升级组件包前注意备份这个配置文件  

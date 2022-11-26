@@ -4,17 +4,24 @@
 
 ## 使用插件 :id=use
 
-?> 不熟悉 *npm* 的用户可以通过 [小程序方式](overview/quickstart#mp) 获取包含扩展插件的组件包   
+!> 直接将插件文件夹拷贝到组件包中无法生效，请通过以下方式生成包含扩展的组件包
 
-1. 选择需要的插件  
+#### 小程序方式
+?> 该方式适合不熟悉 *npm* 的用户
+
+1. 通过 [小程序方式](overview/quickstart#mp) 获取包含扩展插件的组件包  
+2. 将下载的组件包解压，原生小程序复制到 *components* 目录下，*uni-app* 复制到项目根目录下，按照源码方式引入即可，详见 [引入方式](overview/quickstart#use)
+
+#### npm 方式
+
+1. 获取完整的组件包  
+   通过 [npm](overview/quickstart#npm) 或 [git](overview/quickstart#git) 等方式获取 **包含完整项目** 的组件包（注意从 *uni-app* 的插件市场中导入的包中仅包含构建后的组件，**不包含** 构建工具和插件）
+2. 选择需要的插件  
    参考下方插件使用说明，确定要使用的插件，将其名称填入 [tools/config.js](https://github.com/jin-yufeng/mp-html/blob/master/tools/config.js#L8) 中的 *plugins* 中  
    如果想仅在部分平台使用该插件，可以在该插件目录下的 *build.js* 的 *platform* 字段中填入需要的平台名称  
-2. 生成组件包  
+3. 生成组件包  
    设置完成后，可通过项目提供的命令行工具生成新的组件包，具体见 [生成组件包](advanced/develop#pack)  
-
-?> 从 *uni-app* 的插件市场中导入的包中仅包含构建后的组件，不包含构建工具和插件，使用插件需要先 [获取完整的组件包](overview/quickstart#source)
-
-!> 直接将插件文件拷贝到项目中无法生效，必须使用上述方法构建包含插件的新组件包进行使用
+4. 按照源码或 *npm* 方式引入构建后的组件包进行使用即可，详见 [引入方式](overview/quickstart#use)
 
 ## audio
 功能：音乐播放器  
@@ -83,6 +90,8 @@
 | 普通标签 | 设置字体大小、斜体、粗体、下划线（[2.0.4+](changelog/changelog#v204)）、居中、缩进、删除 |
 
 ?> [2.2.1](changelog/changelog#v221) 版本起所有标签支持上下移动操作，但仅限同级标签间移动，即在有同级标签且非第一个（或最后一个）时可以上移（或下移）
+
+?> 在支付宝小程序中使用时需要在页面样式中添加 *page { position: relative; }* 避免 *tooltip* 错位
 
 ?> 菜单项可以通过编辑 *plugins/editable/config.js* 进行修改，仅可以删减或调整顺序，添加或更名无效
 
@@ -173,7 +182,9 @@ Page({
 ```
 
 ##### 示例项目 :id=editable_demo
-微信小程序点击 [代码片段](https://developers.weixin.qq.com/s/oZeHKcmg7gyP) 即可在微信开发者工具中导入；*uni-app* 下载 [示例项目](https://6874-html-foe72-1259071903.tcb.qcloud.la/editable.zip?sign=cc0017be203fb3dbca62d33a0c15792e&t=1608447445) 在 *HBuilder X* 中打开即可体验；注意示例项目中不一定包含最新版本，仅供参考使用方法  
+微信小程序点击 [代码片段](https://developers.weixin.qq.com/s/GFbJKum77eBy) 即可在微信开发者工具中导入；*uni-app* 下载 [示例项目](https://mp-html.oss-cn-hangzhou.aliyuncs.com/editable.zip) 在 *HBuilder X* 中打开即可体验；注意示例项目中不一定包含最新版本，仅供参考使用方法  
+
+?> 也可以参考示例小程序 [源代码](https://github.com/jin-yufeng/mp-html-demo)
 
 注意事项：  
 不要在 *editable* 属性被设置为 *true* 前通过 [setContent](advanced/api#setContent) 方法（用 [content](basic/prop#content) 属性）设置内容，否则在切换为 *true* 后会变成空白  
@@ -216,6 +227,8 @@ Page({
 <!-- pre 中内含一个 code，并在 pre 或 code 的 class 中设置 language- -->
 <pre><code class="language-css">p { color: red }</code></pre>
 ```
+
+?> 与 [editable](#editable) 插件共用时，编辑状态下，不会进行高亮，可以直接修改代码文本
 
 ?> 本插件的高亮功能依赖于 [prismjs](https://prismjs.com/)，默认配置中仅支持 *html*、*css*、*c-like*、*javascript* 语言和 *Tomorrow Night* 主题，如果需要更多语言或更换主题请前往 [官网](https://prismjs.com/download.html) 下载对应的 *prism.min.js* 和 *prism.css* 并替换 *plugins/highlight/* 目录下的文件（*prismjs* 的插件大多涉及 *dom* 操作，基本不可用，请勿选择）  
 
@@ -276,6 +289,8 @@ function search (key) {
 }
 ```
 
+?> 具体用法可以参考示例小程序 [源代码](https://github.com/jin-yufeng/mp-html-demo)
+
 附加说明：  
 1. 不传入 *key*（或为空）时即可取消搜索，取消所有的高亮，还原到原来的效果  
 2. 进行新的搜索时旧的搜索结果将被还原，旧的结果中的 *highlight* 等方法不再可用  
@@ -286,6 +301,9 @@ function search (key) {
 
 ## style
 功能：解析和匹配 *style* 标签中的样式  
+
+?> 这里的 *style* 标签指的是传入 [content](basic/prop#content) 属性中的 *html* 里包含的 *style* 标签，且 *style* 标签要放在其他标签前面才能生效  
+
 大小：*≈3.5KB*  
 支持平台：  
 
@@ -329,7 +347,7 @@ function search (key) {
 
 同时，其可以被 [pause-video](basic/prop#pause-video) 属性控制  
 
-!> 本插件仅用于将官方 [腾讯视频插件](https://github.com/tvfe/txv-miniprogram-plugin) 应用于本组件，使用前请确认已经成功申请使用该插件并按要求在小程序 *app.json* 中配置完成（*uni-app* 中的配置方法可以参考 [#103](https://github.com/jin-yufeng/mp-html/issues/103#issuecomment-654586246)），否则无法生效  
+!> 本插件仅用于将官方 [腾讯视频插件](https://github.com/tvfe/txv-miniprogram-plugin) 应用于本组件，使用前请确认已经成功申请使用该插件并按要求在小程序 *app.json* 中配置完成（*uni-app* 中的配置方法可以参考 [#103](https://github.com/jin-yufeng/mp-html/issues/103#issuecomment-654586246)），否则可能报错 **This application has not registered any plugins yet** 且无法生效  
 
 ## img-cache
 功能：图片本地缓存  
@@ -356,6 +374,23 @@ function search (key) {
 | clear() | 清空所有缓存 |
 
 !> 请尽量确保 *src* 中含有文件后缀名，不以后缀结尾也没关系，插件会从路径中推测合理的图片后缀，如果完全不包含后缀信息可能会无法保存到相册  
+
+## latex
+功能：渲染 *latex* 公式  
+大小：**≈300KB**  
+作者：[@Zeng-J](https://github.com/Zeng-J)  
+支持平台：  
+
+| 微信小程序 | QQ 小程序 | 百度小程序 | 支付宝小程序 | 头条小程序 | uni-app |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| √ | √ | √ | √ | √ | √ |
+
+说明：  
+引入本插件后，会将 *$xxx$* 的文本内容按照 *latex* 规则进行解析和渲染   
+
+?> 与 [editable](#editable) 插件共用时，编辑状态下，公式不会渲染，可以直接修改公式文本
+
+?> 本插件通过 [katex-mini](https://github.com/rojer95/katex-mini) 解析 *latex* 文本，[字体文件](https://github.com/KaTeX/KaTeX/tree/main/fonts) 建议自行转存  
 
 ## 开发插件 :id=develop
 一个插件大致需要以下文件（*plugin/template* 中提供了一个模板） 

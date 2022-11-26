@@ -3,11 +3,17 @@
  */
 Component({
   data: {
-    ctrl: {} // 控制信号
+    ctrl: {}, // 控制信号
+    // #ifdef MP-WEIXIN
+    isiOS: wx.getSystemInfoSync().system.includes('iOS')
+    // #endif
   },
   properties: {
     childs: Array, // 子节点列表
     opts: Array // 设置 [是否开启懒加载, 加载中占位图, 错误占位图, 是否使用长按菜单]
+  },
+  options: {
+    addGlobalClass: true
   },
   // #ifndef MP-TOUTIAO
   attached () {
@@ -29,12 +35,20 @@ Component({
      * @param {String} path 路径
      */
     getNode (path) {
-      const nums = path.split('_')
-      let node = this.properties.childs[nums[0]]
-      for (let i = 1; i < nums.length; i++) {
-        node = node.children[nums[i]]
+      try {
+        const nums = path.split('_')
+        let node = this.properties.childs[nums[0]]
+        for (let i = 1; i < nums.length; i++) {
+          node = node.children[nums[i]]
+        }
+        return node
+      } catch {
+        return {
+          text: '',
+          attrs: {},
+          children: []
+        }
       }
-      return node
     },
     /**
      * @description 播放视频事件
@@ -60,6 +74,9 @@ Component({
             // #endif
           )
           ctx.id = id
+          if (this.root.playbackRate) {
+            ctx.playbackRate(this.root.playbackRate)
+          }
           this.root._videos.push(ctx)
         }
       }
@@ -120,6 +137,23 @@ Component({
         this.setData({
           ['ctrl.' + i]: val
         })
+      }
+      this.checkReady()
+    },
+
+    /**
+     * @description 检查是否所有图片加载完毕
+     */
+    checkReady () {
+      if (!this.root.properties.lazyLoad) {
+        this.root.imgList._unloadimgs -= 1
+        if (!this.root.imgList._unloadimgs) {
+          setTimeout(() => {
+            this.root.getRect().then(rect => {
+              this.root.triggerEvent('ready', rect)
+            })
+          }, 350)
+        }
       }
     },
 
@@ -182,11 +216,14 @@ Component({
             ['ctrl.' + i]: index
           })
         }
-      } else if (node.name === 'img' && this.properties.opts[2]) {
+      } else if (node.name === 'img') {
         // 显示错误占位图
-        this.setData({
-          ['ctrl.' + i]: -1
-        })
+        if (this.properties.opts[2]) {
+          this.setData({
+            ['ctrl.' + i]: -1
+          })
+        }
+        this.checkReady()
       }
       if (this.root) {
         this.root.triggerEvent('error', {
