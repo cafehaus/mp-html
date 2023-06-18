@@ -148,7 +148,12 @@
       </block>
       <!-- 广告短代码 -->
       <block v-else-if="n.name==='minapperad'">
+        <!-- #ifndef MP-KUAISHOU -->
         <ad :unit-id="n.attrs.unitid" :ad-type="n.attrs.adtype" :ad-theme="n.attrs.adtheme" :ad-intervals="n.attrs.adintervals" />
+        <!-- #endif -->
+        <!-- #ifdef MP-KUAISHOU -->
+        <ad :unit-id="n.attrs.unitid" :type="n.attrs.adtype" :ad-theme="n.attrs.adtheme" :ad-intervals="n.attrs.adintervals" />
+        <!-- #endif -->
       </block>
       <!-- 地图短代码 -->
       <block v-else-if="n.name==='minappermap'">
