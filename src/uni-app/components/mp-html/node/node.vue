@@ -28,8 +28,8 @@
       <text v-else-if="n.name==='br'">\n</text>
       <!-- 链接 -->
       <view v-else-if="n.name==='a'" :id="n.attrs.id" :class="(n.attrs.href?'_a ':'')+n.attrs.class" hover-class="_hover" :style="'display:inline;'+n.attrs.style" :data-i="i" :appid="n.attrs.appid" :redirectype="n.attrs.redirectype" :jumptype="n.attrs.jumptype" :feedid="n.attrs.feedid" :path="n.attrs.path" :src="n.attrs.href" :filetype="n.attrs.filetype" @tap.stop="linkTap">
-        <node name="span" :childs="n.children" :opts="opts" style="display:inherit;" />
         <text v-if="n.attrs.redirectype === 'miniapp' || n.attrs.redirectype === 'apppage'" class="iconfont icon-miniapp-logo" />
+        <node name="span" :childs="n.children" :opts="opts" style="display:inherit;" />
       </view>
       <!-- 视频 -->
       <!-- #ifdef APP-PLUS -->
