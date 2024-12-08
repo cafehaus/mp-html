@@ -29,6 +29,7 @@
       <!-- 链接 -->
       <view v-else-if="n.name==='a'" :id="n.attrs.id" :class="(n.attrs.href?'_a ':'')+n.attrs.class" hover-class="_hover" :style="'display:inline;'+n.attrs.style" :data-i="i" :appid="n.attrs.appid" :redirectype="n.attrs.redirectype" :jumptype="n.attrs.jumptype" :feedid="n.attrs.feedid" :path="n.attrs.path" :src="n.attrs.href" :filetype="n.attrs.filetype" @tap.stop="linkTap">
         <text v-if="n.attrs.redirectype === 'miniapp' || n.attrs.redirectype === 'apppage'" class="iconfont icon-miniapp-logo" />
+        <text v-else class="iconfont icon-miniapp-link" />
         <node name="span" :childs="n.children" :opts="opts" style="display:inherit;" />
       </view>
       <!-- 视频 -->
@@ -65,7 +66,7 @@
       <!-- wm-custom -->
       <!-- 跳转短代码 -->
       <block v-else-if="n.name==='minappershortcode'">
-        <view class="wmcode-view" :appid="n.attrs.appid" :redirectype="n.attrs.redirectype" :jumptype="n.attrs.jumptype" :url="n.attrs.url" :path="n.attrs.path" @tap="goTo">
+        <view class="wmcode-view" :appid="n.attrs.appid" :redirectype="n.attrs.redirectype" :jumptype="n.attrs.jumptype" :url="n.attrs.url" :path="n.attrs.path" :unassociated="n.attrs.unassociated" @tap="goTo">
           <view class="wmcode-inner">
             <view class="wmcode-img">
               <image mode="aspectFill" :src="n.attrs.poster" />
@@ -238,6 +239,14 @@
             <image mode="aspectFill" style="height: 600rpx;width:100%;" :src="item.imageurl" />
           </swiper-item>
         </swiper>
+      </block>
+      <!-- 微信小店商品短代码 -->
+      <block v-else-if="n.name==='wechatshopproduct'">
+        <store-product :appid="n.attrs.appid" :product-id="n.attrs.productid" :product-promotion-link="n.attrs.productpromotionlink" />
+      </block>
+      <!-- 微信小店首页短代码 -->
+      <block v-else-if="n.name==='wechatshop'">
+        <store-home :appid="n.attrs.appid" />
       </block>
       <!-- insert -->
       <!-- 富文本 -->
@@ -509,13 +518,20 @@ export default {
             window.open(href)
             // #endif
             // #ifdef MP
+            // 判断a标签src里是不是插入的文档链接
+            let isDoc = /\.(doc|docx|xls|xlsx|ppt|pptx|pdf)$/.test(href)
+            if (isDoc) {
+              this.openLinkDoc(href)
+              return
+            }
             if (attrs.redirectype) {
               this.goTo(null, {
                 appid: attrs.appid,
                 redirectype: attrs.redirectype,
                 path: attrs.path,
                 jumptype: attrs.jumptype,
-                url: attrs.href
+                url: attrs.href,
+                unassociated: attrs.unassociated,
               })
             } else {
               uni.setClipboardData({
@@ -547,10 +563,36 @@ export default {
             redirectype: attrs.redirectype,
             path: attrs.path,
             jumptype: attrs.jumptype,
-            url: attrs.href
+            url: attrs.href,
+            unassociated: attrs.unassociated,
           })
         }
       }
+    },
+
+    // 打开文档
+    openLinkDoc(href) {
+      uni.downloadFile({
+        url: href,
+        success: function (res) {
+          const filePath = res.tempFilePath
+          uni.openDocument({
+            showMenu: true,
+            filePath
+            // fieldType
+          })
+        },
+        fail(e){
+          // 失败了直接复制链接
+          uni.setClipboardData({
+            data: href,
+            success: () =>
+              uni.showToast({
+                title: '链接已复制'
+              })
+          })
+        }
+      })
     },
 
     /**
@@ -605,24 +647,12 @@ export default {
     goTo(e, info = {}){
       const eInfo = (e && e.currentTarget && e.currentTarget.dataset) ? e.currentTarget.dataset : {}
       let appid = info.appid || eInfo.appid
-      let redirectype = info.redirectype || eInfo.redirectype  
-      let path = info.path || eInfo.path
+      let redirectype = info.redirectype || eInfo.redirectype
+      let path = info.path || eInfo.path || ''
       let url = info.url || eInfo.url
       let jumptype = info.jumptype || eInfo.jumptype
+      let unassociated = info.unassociated || eInfo.unassociated
 
-      if (redirectype == 'apppage') { //跳转到小程序内部页面         
-        uni.navigateTo({
-          url: path
-        })
-      }
-      
-      if (redirectype == 'webpage') { //跳转到web-view内嵌的页面
-        url = '../webview/webview?url=' + url;
-        uni.navigateTo({
-          url: url
-        })
-      }
-      
       let isWx = false
       let isMp = false
       // #ifdef MP-WEIXIN
@@ -631,37 +661,77 @@ export default {
       // #ifdef MP
       isMp = true
       // #endif
-      
+
+      let reg = /^weixin-.*/
+      // #ifdef MP-WEIXIN
+      reg = /^weixin-.*/
+      // #endif
+      // #ifdef MP-BAIDU
+      reg = /^baidu-.*/
+      // #endif
+      // #ifdef MP-TOUTIAO
+      reg = /^toutiao-.*/
+      // #endif
+      // #ifdef MP-QQ
+      reg = /^qq-.*/
+      // #endif
+      // #ifdef MP-ALIPAY
+      reg = /^alipay-.*/
+      // #endif
+      // #ifdef MP-KUAISHOU
+      reg = /^kuaishou-.*/
+      // #endif
+
+      if (redirectype == 'apppage' ||  redirectype == 'miniapp') {
+        let pathList = path.split(',')
+        path = pathList.find(m => reg.test(m)) || ''
+        path = path.replace(/(weixin|baidu|toutiao|alipay|kuaishou|qq)-/, '')
+      }
+
+      if (redirectype == 'apppage' && isMp) { //跳转到小程序内部页面
+        uni.navigateTo({
+          url: path
+        })
+      }
+      if (redirectype == 'webpage') { //跳转到web-view内嵌的页面
+        // #ifndef MP-WEIXIN
+        url='/pages/common/web?url=' + url
+        uni.navigateTo({
+          url
+        })
+        // #endif
+
+        // #ifdef MP-WEIXIN
+        if (unassociated==='1') {
+          wx.openOfficialAccountArticle({
+            url, // 此处填写公众号文章连接
+            success: res => {
+            },
+            fail: res => {
+              console.log(res);
+            }
+          })
+        } else {
+          url='/pages/common/web?url=' + url
+          uni.navigateTo({
+            url
+          })
+        }
+        // #endif
+      }
+
       if (appid && isMp && redirectype == 'miniapp') { //跳转其他小程序
         let appidList =  appid.split(',')
-        let reg = /^weixin-.*/
-        // #ifdef MP-WEIXIN
-        reg = /^weixin-.*/
-        // #endif
-        // #ifdef MP-BAIDU
-        reg = /^baidu-.*/
-        // #endif
-        // #ifdef MP-TOUTIAO
-        reg = /^toutiao-.*/
-        // #endif
-        // #ifdef MP-QQ
-        reg = /^qq-.*/
-        // #endif
-        // #ifdef MP-ALIPAY
-        reg = /^alipay-.*/
-        // #endif
-        // #ifdef MP-KUAISHOU
-        reg = /^kuaishou-.*/
-        // #endif
         let appId = appidList.find(m => reg.test(m)) || ''
         if (!appId) return
-        
+
         // 去掉前缀
         appId = appId.replace(/(weixin|baidu|toutiao|alipay|kuaishou|qq)-/, '')
         if(isWx && jumptype === 'embedded') {
           uni.openEmbeddedMiniProgram({
             appId,
-            path
+            path,
+            allowFullScreen: true
           })
         } else {
           uni.navigateToMiniProgram({
@@ -680,27 +750,25 @@ export default {
       })
     },
 
-      // 跳转视频号视频
-      openActivity(e){
-        let channelsid = e.currentTarget.dataset.channelsid
-        let feedId=e.currentTarget.dataset.feedid
-        uni.openChannelsActivity({
-          finderUserName:channelsid,
-          feedId: feedId
-          
-        })
-      },
+    // 跳转视频号视频
+    openActivity(e){
+      let channelsid = e.currentTarget.dataset.channelsid
+      let feedId=e.currentTarget.dataset.feedid
+      uni.openChannelsActivity({
+        finderUserName:channelsid,
+        feedId: feedId
+      })
+    },
 
-      // 跳转视频号视频
-      openEvent(e){
-        let channelsid = e.currentTarget.dataset.channelsid
-        let eventId=e.currentTarget.dataset.eventid
-        uni.openChannelsEvent({
-          finderUserName:channelsid,
-          eventId: eventId
-          
-        })
-      },
+    // 跳转视频号视频
+    openEvent(e){
+      let channelsid = e.currentTarget.dataset.channelsid
+      let eventId=e.currentTarget.dataset.eventid
+      uni.openChannelsEvent({
+        finderUserName:channelsid,
+        eventId: eventId
+      })
+    },
 
     // 跳转
     goToSinshopproduct(e){
@@ -711,7 +779,7 @@ export default {
     },
 
     // 打开地图查看位置
-    openmap(e) { 
+    openmap(e) {
       var latitude = Number(e.currentTarget.dataset.latitude)
       var longitude = Number(e.currentTarget.dataset.longitude)
       var address = e.currentTarget.dataset.address
@@ -725,41 +793,6 @@ export default {
       })
     },
 
-    // a标签跳转和复制链接
-    onTapATag(e) {
-      console.log(e)
-      let href = e.currentTarget.dataset.src
-      let appid = e.currentTarget.dataset.appid
-      let redirectype = e.currentTarget.dataset.redirectype
-      let path = e.currentTarget.dataset.path
-      let jumptype = e.currentTarget.dataset.jumptype
-
-      // 判断a标签src里是不是插入的文档链接
-      let isDoc = /\.(doc|docx|xls|xlsx|ppt|pptx|pdf)$/.test(href)
-
-      if (isDoc) {
-        this.openLinkDoc(e)
-        return
-      }
-
-      if(redirectype) {
-        this.goTo(null, {
-          appid,
-          redirectype,
-          path,
-          jumptype,
-          url: href
-        })
-      } else {
-        uni.setClipboardData({
-          data: href,
-          success: () =>
-            uni.showToast({
-              title: '链接已复制'
-            })
-        })
-      }
-    },
     onbaiPanCopy(e) {
       const code =  e.currentTarget.dataset.code
       if (!code) {
@@ -803,52 +836,6 @@ export default {
           duration: 3000
         })
       }
-    },
-
-    // 打开文档
-    async openLinkDoc(e) {
-      let url
-      let fileType
-      let src = e.currentTarget.dataset.src || ''
-
-      // 如果是a标签href中插入的文档
-      const res = await getApp().$api.getBaseConfig()
-      console.log('domains')
-      console.log(res)
-      let info = res.settings || {}
-      let domains = info.downloadfile_domain && info.downloadfile_domain.split(',') || []
-
-      let isHave = domains.find(m => src.includes(m))
-      if(!isHave) {
-        uni.setClipboardData({
-          data: src,
-          success: () =>
-            uni.showToast({
-              title: '链接已复制'
-            })
-        })
-        return
-      }
-
-      let isDoc = /\.(doc|docx|xls|xlsx|ppt|pptx|pdf)$/.test(src)
-      if (src && isDoc){
-        url = src
-        fileType = /doc|docx|xls|xlsx|ppt|pptx|pdf$/.exec(src)[0]
-      } else {
-        url = e.currentTarget.dataset.filelink
-        fileType = e.currentTarget.dataset.filetype
-      }
-
-      uni.downloadFile({
-        url,
-        success: function (res) {
-          const filePath = res.tempFilePath
-          uni.openDocument({
-            filePath,
-            // fieldType
-          })
-        }
-      })
     },
   }
 }

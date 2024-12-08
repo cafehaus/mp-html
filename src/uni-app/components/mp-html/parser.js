@@ -1,7 +1,22 @@
 // wm-custom
-import customTag from './customTag.js'
-const customTagList = customTag.tagList
-const customTagListTxt = customTag.tagListTxt
+const CUSTOM_TAG_LIST = [
+  'minappershortcode',
+  'minapperad',
+  'minappermap',
+  'minapperglobalgoods',
+  'minappergoods',
+  'minappergallery',
+  // #ifdef MP-WEIXIN
+  'baidupan',
+  'minapperqqvideo',
+  'minapperchannelsactivity',
+  'minapperchannelsevent',
+  'minapperchannels',
+  'wechatshopproduct',
+  'wechatshop'
+  // #endif
+]
+const CUSTOM_TAG_LIST_TXT = ',' + CUSTOM_TAG_LIST.join(',') // 注意：这里最前面要自己拼一个逗号进去
 
 /**
  * @fileoverview html 解析器
@@ -10,10 +25,10 @@ const customTagListTxt = customTag.tagListTxt
 // 配置
 const config = {
   // 信任的标签（保持标签名不变）
-  trustTags: makeMap('a,abbr,ad,audio,b,blockquote,br,code,col,colgroup,dd,del,dl,dt,div,em,fieldset,h1,h2,h3,h4,h5,h6,hr,i,img,ins,label,legend,li,ol,p,q,ruby,rt,source,span,strong,sub,sup,table,tbody,td,tfoot,th,thead,tr,title,ul,video' + customTagListTxt),
+  trustTags: makeMap('a,abbr,ad,audio,b,blockquote,br,code,col,colgroup,dd,del,dl,dt,div,em,fieldset,h1,h2,h3,h4,h5,h6,hr,i,img,ins,label,legend,li,ol,p,q,ruby,rt,source,span,strong,sub,sup,table,tbody,td,tfoot,th,thead,tr,title,ul,video' + CUSTOM_TAG_LIST_TXT),
 
   // 块级标签（转为 div，其他的非信任标签转为 span）
-  blockTags: makeMap('address,article,aside,body,caption,center,cite,footer,header,html,nav,pre,section' + customTagListTxt),
+  blockTags: makeMap('address,article,aside,body,caption,center,cite,footer,header,html,nav,pre,section' + CUSTOM_TAG_LIST_TXT),
 
   // #ifdef (MP-WEIXIN || MP-QQ || APP-PLUS || MP-360) && VUE3
   // 行内标签
@@ -24,7 +39,7 @@ const config = {
   ignoreTags: makeMap('area,base,canvas,embed,frame,head,iframe,input,link,map,meta,param,rp,script,source,style,textarea,title,track,wbr'),
 
   // 自闭合的标签
-  voidTags: makeMap('area,base,br,col,circle,ellipse,embed,frame,hr,img,input,line,link,meta,param,path,polygon,rect,source,track,use,wbr' + customTagListTxt),
+  voidTags: makeMap('area,base,br,col,circle,ellipse,embed,frame,hr,img,input,line,link,meta,param,path,polygon,rect,source,track,use,wbr' + CUSTOM_TAG_LIST_TXT),
 
   // html 实体
   entities: {
@@ -79,6 +94,7 @@ const config = {
     repeatdur: 'repeatDur'
   }
 }
+
 const tagSelector = {}
 const {
   windowWidth,
@@ -199,6 +215,10 @@ Parser.prototype.parse = function (content) {
   if (this.nodes.length > 50) {
     mergeNodes(this.nodes)
   }
+  // console.log('html解析的nodes:', this.nodes)
+  // console.log('CUSTOM_TAG_LIST:', CUSTOM_TAG_LIST)
+  // console.log('CUSTOM_TAG_LIST_TXT:', CUSTOM_TAG_LIST_TXT)
+  // console.log('config:', config)
   return this.nodes
 }
 
@@ -210,7 +230,7 @@ Parser.prototype.expose = function () {
   for (let i = this.stack.length; i--;) {
     const item = this.stack[i]
     // wm-custom
-    if (customTagList.includes(item.name)) return
+    if (CUSTOM_TAG_LIST.includes(item.name)) return
 
     if (item.c || item.name === 'a' || item.name === 'video' || item.name === 'audio') return
     item.c = 1
@@ -479,13 +499,13 @@ Parser.prototype.onOpenTag = function (selfClose) {
       latitude: attrs.latitude,
       longitude: attrs.longitude,
       title: attrs.title,
-      id: 'minappermarker1'
+      id: 10001
     }
     markers.push(marker)
     attrs.markers = markers
   }
 
-  if (customTagList.includes(node.name)) {
+  if (CUSTOM_TAG_LIST.includes(node.name)) {
     this.expose()
   }
 
@@ -833,7 +853,7 @@ Parser.prototype.popNode = function () {
     || node.name === 'iframe' // eslint-disable-line
     // #endif
     // wm-custom
-    || customTagList.includes(node.name)
+    || CUSTOM_TAG_LIST.includes(node.name)
   ) {
     this.expose()
   } else if (node.name === 'video') {
